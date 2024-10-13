@@ -29,17 +29,16 @@ const Feed = () => {
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [searchedResults, setSearchedResults] = useState([]);
 
-  // GET request to our own API to get feed data
-  const fetchPosts = async () => {
-    const response = await fetch("/api/prompt");
-    const data = await response.json()
-    ;
-    // Update the 'posts' state
-    setPosts(data);
-  };
-  
   // Called at the start to fetch posts
   useEffect(() => {
+    // GET request to our own API to get feed data
+    const fetchPosts = async () => {
+      const response = await fetch("/api/prompt");
+      const data = await response.json()
+      ;
+      // Update the 'posts' state
+      setPosts(data);
+    };
     fetchPosts();
   }, []);
 
