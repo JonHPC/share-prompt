@@ -22,32 +22,59 @@ const PromptCardList = ({ data, handleTagClick }) => {
 }
 
 const Feed = () => {
-  const [searchText, setSearchText] = useState("");
   const [posts, setPosts] = useState([]);
 
-  // Handle search function here
-   // Search by prompt
-   // Search by tag
-   // Search by username
-  // Implement click on tag
-  // Implement view other profiles
+  // Search states
+  const [searchText, setSearchText] = useState("");
+  const [searchTimeout, setSearchTimeout] = useState(null);
+  const [searchedResults, setSearchedResults] = useState([]);
+
+  // GET request to our own API to get feed data
+  const fetchPosts = async () => {
+    const response = await fetch("/api/prompt");
+    const data = await response.json()
+    ;
+    // Update the 'posts' state
+    setPosts(data);
+  };
+  
+  // Called at the start to fetch posts
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  // Filter's the prompts based on the search text
+  const filterPrompts = (searchtext) => {
+    const regex = new RegExp(searchtext, "i"); // 'i' flag for case-insensitive search
+    return posts.filter(
+      (item) =>
+        regex.test(item.creator.username) ||
+        regex.test(item.tag) ||
+        regex.test(item.prompt)
+    );
+  };
 
   const handleSearchChange = (e) => {
+    clearTimeout(searchTimeout);
+    setSearchText(e.target.value);
 
-  }
+    // debounce method
+    setSearchTimeout(
+      setTimeout(() => {
+        const searchResult = filterPrompts(e.target.value);
+        setSearchedResults(searchResult);
+      }, 500)
+    );
+  };
 
-  // GET request to our own API to get feed data, called at the start
-  useEffect(() => {
-    const fetchPosts = async () => {
-      const response = await fetch("/api/prompt");
-      const data = await response.json();
+  // Inputs the tag name into the search bar when clicked
+  const handleTagClick = (tagName) => {
+    setSearchText(tagName);
 
-      // Update the 'posts' state
-      setPosts(data);
-    }
+    const searchResult = filterPrompts(tagName);
+    setSearchedResults(searchResult);
+  };
 
-    fetchPosts();
-  }, [])
 
   return (
     <section className="feed">
@@ -63,11 +90,20 @@ const Feed = () => {
         />
       </form>
 
+      {/* All Prompts */}
+      {/* If there is text in the search bar, show the search results, otherwise show all posts */}
+      {searchText ? (
+        <PromptCardList 
+          data={searchedResults}
+          handleTagClick={handleTagClick}
+        />
+      ) : (
+        <PromptCardList 
+          data={posts} 
+          handleTagClick={handleTagClick} 
+        />
+      )}
 
-      <PromptCardList 
-        data={posts}
-        handleTagClick={() => {}}
-      />
     </section>
   )
 }
