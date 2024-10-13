@@ -3,6 +3,8 @@
 import { connectToDB } from '@utils/database';
 import Prompt from '@models/prompt';
 
+// dynamic forces a refresh instead of reading form the cache
+export const dynamic = 'force-dynamic'
 export const GET = async (req) => {
 
   try {
